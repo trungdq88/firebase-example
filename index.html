@@ -1,3 +1,5 @@
+<input id="text" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.all.js"></script>
 <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
 <script>
@@ -12,5 +14,24 @@
 
   // Get a reference to the database service
   var database = firebase.database();
+  const ref = firebase.database().ref('/');
+  
+  // Binding Rx for Firebase
+  const obsChange = new Rx.Subject();
+  ref.on('value', function(snapshot) {
+    obsChange.onNext(snapshot);
+  });
+
+  // Handle input
+  Rx.Observable.fromEvent(text, 'keyup')
+  .map(e => e.target.value)
+  .distinctUntilChanged()
+  .subscribe(val => ref.set(val));
+
+  // Handle remote data
+  obsChange
+  .map(snapshot => snapshot.val())
+  .subscribe(val => text.value = val);
+
 </script>
     
