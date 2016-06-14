@@ -17,7 +17,9 @@
 
   // Get a reference to the database service
   var database = firebase.database();
-  const ref = firebase.database().ref('/');
+  var auth = firebase.auth();
+
+  const databaseRef = firebase.database().ref('/');
   
   // Observables
   const obsValueChange = new Rx.Subject();
@@ -26,11 +28,11 @@
   const obsAuthLoggedOut = obsAuthStateChange.filter(user => user === null);
 
   // Binding Rx for Firebase
-  ref.on('value', function(snapshot) {
+  databaseRef.on('value', function(snapshot) {
     obsValueChange.onNext(snapshot);
   });
 
-  firebase.auth().onAuthStateChanged(user => {
+  auth.onAuthStateChanged(user => {
     obsAuthStateChange.onNext(user);
   });
 
@@ -40,7 +42,7 @@
   Rx.Observable.fromEvent(txtValue, 'keyup')
   .map(e => e.target.value)
   .distinctUntilChanged()
-  .subscribe(val => ref.set(val));
+  .subscribe(val => databaseRef.set(val));
 
   obsValueChange
   .map(snapshot => snapshot.val())
@@ -50,7 +52,7 @@
   // Authenticate
   ///////////////
   obsAuthLoggedIn.subscribe(user => {
-    var user = firebase.auth().currentUser;
+    var user = auth.currentUser;
     lblUsername.innerText = user.displayName;
   });
 
@@ -59,8 +61,8 @@
   });
 
   Rx.Observable.fromEvent(btnFacebook, 'click')
-  .subscribe(e => firebase.auth().signInWithPopup(new firebase.auth.FacebookAuthProvider()));
+  .subscribe(e => auth.signInWithPopup(new firebase.auth.FacebookAuthProvider()));
 
   Rx.Observable.fromEvent(btnLogout, 'click')
-  .subscribe(e => firebase.auth().signOut());
+  .subscribe(e => auth.signOut());
 </script>
