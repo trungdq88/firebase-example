@@ -28,6 +28,7 @@ html, body {
   border-radius: 30px;
   left: 0;
   top: 0;
+  opacity: 0;
 }
 </style>
 </head>
@@ -66,6 +67,7 @@ html, body {
     Rx.Observable.fromEvent(range, 'touchstart')
     .startWith(sampleTouch)
     .flatMap(e => Rx.Observable.fromEvent(range, 'touchmove')
+        .startWith(sampleTouch)
         .takeUntil(Rx.Observable.fromEvent(range, 'touchend'))
         .concat(Rx.Observable.just(sampleTouch))
     )
@@ -92,7 +94,7 @@ html, body {
       return { left, top };
     })
     .map(pos => {
-      target.style.display = "block";
+      target.style.opacity = 1;
       target.style.transform = `translate3d(${pos.left}px, ${pos.top}px, 0)`;
 
       return {
