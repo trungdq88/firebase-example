@@ -102,9 +102,8 @@ html, body {
         y: (pos.top + target.offsetHeight / 2) - (range.offsetTop + range.offsetHeight / 2),
       };
     })
-    .debounce(50)
+    .debounce(10)
     .subscribe(value => {
-      console.log(value);
       databaseRef.update({'velocity': value});
     });
   </script>
