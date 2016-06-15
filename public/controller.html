@@ -1,5 +1,5 @@
 <head>
-<meta name="viewport" content="width=device-width">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
 <style>
 html, body {
   width: 100%;
@@ -26,7 +26,6 @@ html, body {
   background-color: #ff8080;
   position: absolute;
   border-radius: 30px;
-  display: none;
   left: 0;
   top: 0;
 }
@@ -40,15 +39,43 @@ html, body {
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.lite.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
   <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyCpQjFy_vv-bMZzel-NWu44v1vZGCL8uxE",
+      authDomain: "fir-example-c2211.firebaseapp.com",
+      databaseURL: "https://fir-example-c2211.firebaseio.com",
+      storageBucket: "",
+    };
+    firebase.initializeApp(config);
+
+    // Get a reference to the database service
+    var database = firebase.database();
+
+    const databaseRef = database.ref('players/player0');
+
+    const sampleTouch = {
+      preventDefault: () => {},
+      touches: [{
+        clientX: range.offsetLeft + range.offsetWidth / 2,
+        clientY: range.offsetTop + range.offsetHeight / 2
+      }],
+    };
+
     Rx.Observable.fromEvent(range, 'touchstart')
+    .startWith(sampleTouch)
     .flatMap(e => Rx.Observable.fromEvent(range, 'touchmove')
-        .takeUntil(Rx.Observable.fromEvent(range, 'touchend')
-            .do(e => target.style.display = "none")))
-    .map(e => { return {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    }})
+        .takeUntil(Rx.Observable.fromEvent(range, 'touchend'))
+        .concat(Rx.Observable.just(sampleTouch))
+    )
+    .map(e => {
+      e.preventDefault();
+      return {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    })
     .map(touch => { return {
       left: touch.x - target.offsetWidth / 2,
       top: touch.y - target.offsetHeight / 2,
@@ -76,6 +103,7 @@ html, body {
     .debounce(50)
     .subscribe(value => {
       console.log(value);
+      databaseRef.update({'velocity': value});
     });
   </script>
 </body>
