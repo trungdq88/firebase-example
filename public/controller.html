@@ -1,0 +1,81 @@
+<head>
+<meta name="viewport" content="width=device-width">
+<style>
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+#container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#range {
+  width: 200px;
+  height: 200px;
+  border-radius: 110px;
+  border: 10px solid #ccc;
+  margin: 0 auto;
+}
+#target {
+  width: 60px;
+  height: 60px;
+  background-color: #ff8080;
+  position: absolute;
+  border-radius: 30px;
+  display: none;
+  left: 0;
+  top: 0;
+}
+</style>
+</head>
+<body>
+  <div id="container">
+    <div id="range">
+      <div id="target">
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.lite.js"></script>
+  <script>
+    Rx.Observable.fromEvent(range, 'touchstart')
+    .flatMap(e => Rx.Observable.fromEvent(range, 'touchmove')
+        .takeUntil(Rx.Observable.fromEvent(range, 'touchend')
+            .do(e => target.style.display = "none")))
+    .map(e => { return {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    }})
+    .map(touch => { return {
+      left: touch.x - target.offsetWidth / 2,
+      top: touch.y - target.offsetHeight / 2,
+    }})
+    .map(pos => {
+      let left = pos.left;
+      let top = pos.top;
+      const limitLeft = range.offsetWidth + range.offsetLeft - target.offsetWidth;
+      const limitTop = range.offsetHeight + range.offsetTop - target.offsetHeight;
+      if (pos.left < range.offsetLeft) left = range.offsetLeft;
+      if (pos.left > limitLeft) left = limitLeft;
+      if (pos.top < range.offsetTop) top = range.offsetTop;
+      if (pos.top > limitTop) top = limitTop;
+      return { left, top };
+    })
+    .map(pos => {
+      target.style.display = "block";
+      target.style.transform = `translate3d(${pos.left}px, ${pos.top}px, 0)`;
+
+      return {
+        x: (pos.left + target.offsetWidth / 2) - (range.offsetLeft + range.offsetWidth / 2),
+        y: (pos.top + target.offsetHeight / 2) - (range.offsetTop + range.offsetHeight / 2),
+      };
+    })
+    .debounce(50)
+    .subscribe(value => {
+      console.log(value);
+    });
+  </script>
+</body>
