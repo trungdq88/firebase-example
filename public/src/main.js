@@ -29,6 +29,8 @@ const auth = firebase.auth();
 
 auth.onAuthStateChanged(user => {
   obsAuthStateChange.onNext(user);
+});
+firebase.auth().getRedirectResult().then(() => {
   screenLoading.style.display = 'none';
 });
 
@@ -38,6 +40,7 @@ obsAuthLoggedIn.subscribe(() => {
   lblUsername.innerText = user.displayName;
   imgAvatar.style.backgroundImage = `url('${user.photoURL}')`;
   screenLogin.style.display = 'none';
+  screenLoading.style.display = 'none';
   database.ref(`players/${user.uid}`).update({
     'name': user.displayName,
     'avatar': user.photoURL,
@@ -51,7 +54,7 @@ obsAuthLoggedOut.subscribe(() => {
 });
 
 Rx.Observable.fromEvent(btnFacebook, 'click')
-.subscribe(() => auth.signInWithPopup(new firebase.auth.FacebookAuthProvider()));
+.subscribe(() => auth.signInWithRedirect(new firebase.auth.FacebookAuthProvider()));
 
 Rx.Observable.fromEvent(btnLogout, 'click')
 .subscribe(() => auth.signOut());

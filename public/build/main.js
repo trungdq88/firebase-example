@@ -35,6 +35,8 @@ var auth = firebase.auth();
 
 auth.onAuthStateChanged(function (user) {
   obsAuthStateChange.onNext(user);
+});
+firebase.auth().getRedirectResult().then(function (result) {
   screenLoading.style.display = 'none';
 });
 
@@ -57,7 +59,7 @@ obsAuthLoggedOut.subscribe(function () {
 });
 
 Rx.Observable.fromEvent(btnFacebook, 'click').subscribe(function () {
-  return auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
+  return auth.signInWithRedirect(new firebase.auth.FacebookAuthProvider());
 });
 
 Rx.Observable.fromEvent(btnLogout, 'click').subscribe(function () {
