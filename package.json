@@ -5,6 +5,7 @@
   "main": "src/app.jsx",
   "scripts": {
     "build": "NODE_ENV=production npm run webpack",
+    "build-controller": "babel -d ./public/build ./public/src",
     "clean": "rimraf $npm_package_config_buildDir && mkdir $npm_package_config_buildDir",
     "env": "env",
     "lint": "eslint --ext .jsx ./src && echo No linting errors.",
