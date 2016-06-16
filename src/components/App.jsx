@@ -1,12 +1,9 @@
 import React from 'react';
-import GameBoard from './GameBoard/GameBoard.jsx'
+import GameBoard from './GameBoard/GameBoard.jsx';
+import './App.less';
 
 export default () => {
   return (
-    <div>
-      Welcome!
-      <GameBoard/>
-      <button id="the-bootstrap-btn" className="btn btn-primary">It's bootstrap!</button>
-    </div>
-  )
+    <GameBoard/>
+  );
 };
