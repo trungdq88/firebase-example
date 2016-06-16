@@ -6,12 +6,22 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: sans-serif;
 }
-#container {
-  height: 100%;
+.screen {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+#container {
+  z-index: 1;
+}
+#login {
+  z-index: 2;
+  background-color: rgba(255, 255, 255, 0.75);
 }
 #range {
   width: 200px;
@@ -30,10 +40,21 @@ html, body {
   top: 0;
   opacity: 0;
 }
+#login-button {
+  text-align: center;
+  background-color: #3b5998;
+  padding: 20px;
+  color: white;
+  font-size: 20px;
+}
 </style>
 </head>
 <body>
-  <div id="container">
+  <div id="login" class="screen">
+    <div id="login-button">Facebook Login</div>
+  </div>
+
+  <div id="container" class="screen">
     <div id="range">
       <div id="target">
       </div>
