@@ -1,8 +1,10 @@
 'use strict';
 
+// Libraries used
 var firebase = firebase || {};
 var Rx = Rx || {};
 
+// View references
 var screenLogin = document.getElementById('screen-login');
 var screenLoading = document.getElementById('screen-loading');
 var imgAvatar = document.getElementById('img-avatar');
@@ -20,7 +22,10 @@ var config = {
   storageBucket: ''
 };
 firebase.initializeApp(config);
+var database = firebase.database();
+var auth = firebase.auth();
 
+// Observables for authenticate
 var obsAuthStateChange = new Rx.Subject();
 var obsAuthLoggedIn = obsAuthStateChange.filter(function (user) {
   return user !== null;
@@ -29,29 +34,25 @@ var obsAuthLoggedOut = obsAuthStateChange.filter(function (user) {
   return user === null;
 });
 
-// Get a reference to the database service
-var database = firebase.database();
-var auth = firebase.auth();
-
+// Authenticate logic
 auth.onAuthStateChanged(function (user) {
   obsAuthStateChange.onNext(user);
 });
-firebase.auth().getRedirectResult().then(function (result) {
+firebase.auth().getRedirectResult().then(function () {
   screenLoading.style.display = 'none';
 });
 
-// Authenticate
 obsAuthLoggedIn.subscribe(function () {
   var user = auth.currentUser;
   lblUsername.innerText = user.displayName;
   imgAvatar.style.backgroundImage = 'url(\'' + user.photoURL + '\')';
   screenLogin.style.display = 'none';
+  screenLoading.style.display = 'none';
   database.ref('players/' + user.uid).update({
     'name': user.displayName,
     'avatar': user.photoURL
   });
 });
-
 obsAuthLoggedOut.subscribe(function () {
   lblUsername.innerText = 'Guest';
   screenLogin.style.display = 'flex';
@@ -61,11 +62,13 @@ obsAuthLoggedOut.subscribe(function () {
 Rx.Observable.fromEvent(btnFacebook, 'click').subscribe(function () {
   return auth.signInWithRedirect(new firebase.auth.FacebookAuthProvider());
 });
-
 Rx.Observable.fromEvent(btnLogout, 'click').subscribe(function () {
   return auth.signOut();
 });
 
+// Joystick controller logic
+
+// A sample fake touch event to align the target to the center
 var sampleTouch = {
   preventDefault: function preventDefault() {},
   touches: [{
@@ -74,6 +77,7 @@ var sampleTouch = {
   }]
 };
 
+// Handle events
 Rx.Observable.fromEvent(range, 'touchstart').startWith(sampleTouch).flatMap(function () {
   return Rx.Observable.fromEvent(range, 'touchmove').startWith(sampleTouch).takeUntil(Rx.Observable.fromEvent(range, 'touchend')).concat(Rx.Observable.just(sampleTouch));
 }).map(function (e) {

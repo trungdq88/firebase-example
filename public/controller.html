@@ -1,6 +1,8 @@
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
-<style>
+<html>
+  <head>
+    <title>Firebase Example Controller</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <style>
 html, body {
   width: 100%;
   height: 100%;
@@ -72,29 +74,30 @@ html, body {
   background-size: cover;
   background-position: center center;
 }
-</style>
-</head>
-<body>
-  <div id="screen-loading" class="screen">
-    Loading...
-  </div>
-
-  <div id="screen-login" class="screen">
-    <div id="btn-facebook">Facebook Login</div>
-  </div>
-
-  <div id="container" class="screen">
-    <div id="profile">
-      <div id="img-avatar"></div>
-      <div id="lbl-username">Guest</div>
-      <div id="btn-logout">Logout</div>
+    </style>
+  </head>
+  <body>
+    <div id="screen-loading" class="screen">
+      Loading...
     </div>
-    <div id="range">
-      <div id="target">
+
+    <div id="screen-login" class="screen">
+      <div id="btn-facebook">Facebook Login</div>
+    </div>
+
+    <div id="container" class="screen">
+      <div id="profile">
+        <div id="img-avatar"></div>
+        <div id="lbl-username">Guest</div>
+        <div id="btn-logout">Logout</div>
+      </div>
+      <div id="range">
+        <div id="target">
+        </div>
       </div>
     </div>
-  </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.lite.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
-  <script src="build/main.js"></script>
-</body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.lite.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+    <script src="build/main.js"></script>
+  </body>
+</html>

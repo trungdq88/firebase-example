@@ -1,6 +1,8 @@
+// Libraries used
 const firebase = firebase || {};
 const Rx = Rx || {};
 
+// View references
 const screenLogin = document.getElementById('screen-login');
 const screenLoading = document.getElementById('screen-loading');
 const imgAvatar = document.getElementById('img-avatar');
@@ -18,15 +20,15 @@ const config = {
   storageBucket: '',
 };
 firebase.initializeApp(config);
+const database = firebase.database();
+const auth = firebase.auth();
 
+// Observables for authenticate
 const obsAuthStateChange = new Rx.Subject();
 const obsAuthLoggedIn = obsAuthStateChange.filter(user => user !== null);
 const obsAuthLoggedOut = obsAuthStateChange.filter(user => user === null);
 
-// Get a reference to the database service
-const database = firebase.database();
-const auth = firebase.auth();
-
+// Authenticate logic
 auth.onAuthStateChanged(user => {
   obsAuthStateChange.onNext(user);
 });
@@ -34,7 +36,6 @@ firebase.auth().getRedirectResult().then(() => {
   screenLoading.style.display = 'none';
 });
 
-// Authenticate
 obsAuthLoggedIn.subscribe(() => {
   const user = auth.currentUser;
   lblUsername.innerText = user.displayName;
@@ -46,7 +47,6 @@ obsAuthLoggedIn.subscribe(() => {
     'avatar': user.photoURL,
   });
 });
-
 obsAuthLoggedOut.subscribe(() => {
   lblUsername.innerText = 'Guest';
   screenLogin.style.display = 'flex';
@@ -55,11 +55,12 @@ obsAuthLoggedOut.subscribe(() => {
 
 Rx.Observable.fromEvent(btnFacebook, 'click')
 .subscribe(() => auth.signInWithRedirect(new firebase.auth.FacebookAuthProvider()));
-
 Rx.Observable.fromEvent(btnLogout, 'click')
 .subscribe(() => auth.signOut());
 
+// Joystick controller logic
 
+// A sample fake touch event to align the target to the center
 const sampleTouch = {
   preventDefault: () => {},
   touches: [{
@@ -68,6 +69,7 @@ const sampleTouch = {
   }],
 };
 
+// Handle events
 Rx.Observable.fromEvent(range, 'touchstart')
 .startWith(sampleTouch)
 .flatMap(() => Rx.Observable.fromEvent(range, 'touchmove')
