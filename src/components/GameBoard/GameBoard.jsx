@@ -1,6 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import d3 from 'd3';
 import Player from '../Player/Player.js';
 import firebaseDemoApp from '../../third-party/Firebase.js';
 
@@ -33,16 +31,17 @@ export default class GameBoard extends React.Component {
     };
   }
 
-  addPlayer() {
+  addPlayer(snapshot) {
     //Should listen to new player event
     let newPlayer = {
-      id: 0,
+      id: snapshot.key,
+      avatar: snapshot.val().avatar,
       size: 20,
       position: {x: 250, y: 250},
       velocity: {x: 0, y: 0},
     };
 
-    firebaseDemoApp.database().ref('players/player' + newPlayer.id + '/velocity').on('value', (snapshot)=> {
+    firebaseDemoApp.database().ref('players/' + newPlayer.id + '/velocity').on('value', (snapshot)=> {
       newPlayer.velocity = snapshot.val();
     });
 
@@ -69,10 +68,11 @@ export default class GameBoard extends React.Component {
       });
     }, 1);
 
-    this.addPlayer();
+    // this.addPlayer();
     //
-    // firebaseDemoApp.database().ref('players/player0/velocity').on('value', (snapshot)=> {
-    //   this.players[0].velocity = snapshot.val();
+    firebaseDemoApp.database().ref('players').on('child_added', (snapshot)=> {
+      this.addPlayer(snapshot);
+    });
     // let player = {
     //   verocity: snapshot.val(),
     // };
@@ -94,7 +94,7 @@ export default class GameBoard extends React.Component {
     return (
       <div style={{width: 500, height: 500, position: 'relative', border: '1px solid black'}}>
         {this.players.map((player) => (
-          <Player key={player.id} radius="20" position={player.position}/>
+          <Player key={player.id} player={player}/>
         ))}
       </div>
     )

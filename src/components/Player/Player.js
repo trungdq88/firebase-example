@@ -6,15 +6,18 @@ export default class Player extends React.Component {
   }
 
   getStyles() {
+    // console.log('translate3d(' + this.props.position.x + ',' + this.props.position.y + ',0)');
     return {
-      width: this.props.radius * 2,
-      height: this.props.radius * 2,
-      borderRadius: this.props.radius,
+      width: this.props.player.size * 2,
+      height: this.props.player.size * 2,
+      borderRadius: this.props.player.size,
       background: 'red',
-      top: this.props.position.y,
-      left: this.props.position.x,
-      position: 'absolute'
-    }
+      transform: 'translate3d(' + this.props.player.position.x + 'px,' + this.props.player.position.y + 'px,0)',
+      backgroundImage: 'url("'+this.props.player.avatar+'")',
+    // top: this.props.position.y,
+    // left: this.props.position.x,
+    // position: 'absolute'
+  }
   }
 
   render() {
