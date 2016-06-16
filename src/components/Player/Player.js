@@ -6,6 +6,10 @@ export default class Player extends React.Component {
     super(...args);
   }
 
+  shouldComponentUpdate() {
+    return false;
+  }
+
   getStyles() {
     return {
       width: this.props.player.width,
@@ -19,7 +23,7 @@ export default class Player extends React.Component {
 
   render() {
     return (
-      <div className="Player" style={this.getStyles()}></div>
+      <div id={'player-' + this.props.player.id} className="Player" style={this.getStyles()}></div>
     );
   }
 }

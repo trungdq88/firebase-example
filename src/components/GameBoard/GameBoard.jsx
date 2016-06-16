@@ -30,46 +30,46 @@ export default class GameBoard extends React.Component {
       radii: undefined,
       collisions: undefined,
       colliding: undefined,
+      speed: undefined,
+      nodes: {},
     };
   }
 
   componentDidMount() {
-    this.timer = setInterval(() => {
-      window.requestAnimationFrame(() => {
-        this.players.forEach(player => {
-          const position = this.getNewPosition(player);
-          player.x = position.x;
-          player.y = position.y;
-          player.isColliding = false;
-        });
-        this.updateTree();
-        // Check collision
-        this.checkCollision();
-        this.forceUpdate();
-      });
-    }, 1);
+    const b = () => {
+      for (let i = 0; i < this.players.length; i++) {
+        this.setNewPosition(this.players[i]);
+      }
+      this.updateTree();
+      // Check collision
+      this.checkCollision();
+      this.updateNodes();
+    };
+    const a = () => {
+      window.requestAnimationFrame(b);
+    };
+    this.timer = setInterval(a, 1);
 
     firebaseDemoApp.database().ref('players').on('child_added', snapshot => {
       this.addPlayer(snapshot);
     });
   }
 
-  getNewPosition(player) {
-    const velocity = player.velocity;
+  setNewPosition(player) {
+    this._cache.speed = Math.sqrt(player.velocity.x * player.velocity.x
+      + player.velocity.y * player.velocity.y);
+    this._cache.newX = player.x + this._cache.speed * player.velocity.x / MAX_VELOCITY / SPEED_CONST;
+    this._cache.newY = player.y + this._cache.speed * player.velocity.y / MAX_VELOCITY / SPEED_CONST;
+    if (this._cache.newX > this.width - player.size || this._cache.newX < 0) {
+      this._cache.newX = player.x;
+    }
+    if (this._cache.newY > this.height - player.size || this._cache.newY < 0) {
+      this._cache.newY = player.y;
+    }
 
-    const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
-    let newX = player.x + speed * velocity.x / MAX_VELOCITY / SPEED_CONST;
-    let newY = player.y + speed * velocity.y / MAX_VELOCITY / SPEED_CONST;
-    if (newX > this.width - player.size || newX < 0) {
-      newX = player.x;
-    }
-    if (newY > this.height - player.size || newY < 0) {
-      newY = player.y;
-    }
-    return {
-      x: newX,
-      y: newY,
-    };
+    player.x = this._cache.newX;
+    player.y = this._cache.newY;
+    player.isColliding = false;
   }
 
   checkCollision() {
@@ -102,6 +102,13 @@ export default class GameBoard extends React.Component {
     this.quadTree.insert(this.players);
   }
 
+  updateNodes() {
+    for (let i = 0; i < this.players.length; i++) {
+      this._cache.nodes[this.players[i].id].style.transform = 'translate3d(' + this.players[i].x + 'px,' + this.players[i].y + 'px,0)';
+      this._cache.nodes[this.players[i].id].style.border = this.players[i].isColliding ? '2px solid red' : '';
+    }
+  }
+
   addPlayer(snapshot) {
     // Should listen to new player event
     const newPlayer = {
@@ -120,6 +127,8 @@ export default class GameBoard extends React.Component {
     });
 
     this.players.push(newPlayer);
+    this.forceUpdate();
+    this._cache.nodes[newPlayer.id] = document.getElementById('player-' + newPlayer.id);
   }
 
   render() {
