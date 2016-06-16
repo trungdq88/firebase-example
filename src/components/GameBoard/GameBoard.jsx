@@ -1,10 +1,12 @@
 import React from 'react';
-import Player from '../Player/Player.js';
 import firebaseDemoApp from '../../third-party/Firebase.js';
 const QuadTree = window.QuadTree;
 
 const MAX_VELOCITY = 80;
 const SPEED_CONST = 150;
+const WEIGHT = 60;
+const FOOD_SIZE = 10;
+const PLAYER_SIZE = 40;
 
 export default class GameBoard extends React.Component {
   constructor(...args) {
@@ -31,7 +33,7 @@ export default class GameBoard extends React.Component {
       collisions: undefined,
       colliding: undefined,
       speed: undefined,
-      nodes: {},
+      avatar: {},
     };
   }
 
@@ -60,21 +62,24 @@ export default class GameBoard extends React.Component {
           id: 'food-' + Math.random(),
           x: Math.floor(Math.random() * (this.width - 20)),
           y: Math.floor(Math.random() * (this.height - 20)),
-          width: 10,
-          height: 10,
+          width: FOOD_SIZE,
+          height: FOOD_SIZE,
           velocity: { x: 0, y: 0 },
-          type: 'food',
+          type: Math.random() > 0.9 ? 'red' : 'green',
         });
         this.forceUpdate();
       }
     }, 2000);
+
+    this.canvas = document.getElementById('canvas');
+    this.context = this.canvas.getContext('2d');
   }
 
   setNewPosition(player) {
     this._cache.speed = Math.sqrt(player.velocity.x * player.velocity.x
       + player.velocity.y * player.velocity.y);
-    this._cache.newX = player.x + this._cache.speed * player.velocity.x / MAX_VELOCITY / SPEED_CONST;
-    this._cache.newY = player.y + this._cache.speed * player.velocity.y / MAX_VELOCITY / SPEED_CONST;
+    this._cache.newX = player.x + this._cache.speed * player.velocity.x / MAX_VELOCITY / SPEED_CONST / (player.height / WEIGHT);
+    this._cache.newY = player.y + this._cache.speed * player.velocity.y / MAX_VELOCITY / SPEED_CONST / (player.height / WEIGHT);
     if (this._cache.newX > this.width - player.width / 2) {
       this._cache.newX = this.width - player.width / 2;
     }
@@ -96,6 +101,7 @@ export default class GameBoard extends React.Component {
   checkCollision() {
     for (let j = 0; j < this.players.length; j++) {
       this._cache.player = this.players[j];
+      if (this._cache.player.type !== 'player') continue;
       this._cache.collisions = this.quadTree.retrieve(this._cache.player);
       for (let i = 0; i < this._cache.collisions.length; i++) {
         this._cache.item = this._cache.collisions[i];
@@ -113,15 +119,16 @@ export default class GameBoard extends React.Component {
           < (this._cache.radii * this._cache.radii);
 
         if (this._cache.colliding) {
-          if (this._cache.player.height > this._cache.item.height) {
-            this.bigger(this._cache.player, this._cache.item.height / 5);
+          if (this._cache.item.type === 'red') {
+            this.resetSize(this._cache.player);
+            this.remove(this._cache.item);
+          } else if (this._cache.player.height > this._cache.item.height) {
+            this.bigger(this._cache.player, this._cache.item.height / FOOD_SIZE);
             this.remove(this._cache.item);
           } else if (this._cache.player.height < this._cache.item.height) {
-            this.bigger(this._cache.item, this._cache.player.height / 5);
+            this.bigger(this._cache.item, this._cache.player.height / FOOD_SIZE);
             this.remove(this._cache.player);
           }
-
-          this.forceUpdate();
         }
       }
     }
@@ -132,6 +139,23 @@ export default class GameBoard extends React.Component {
       item.height += size;
       item.width += size;
     }
+  }
+
+  resetSize(item) {
+    for (let i = 0; i < (item.height - PLAYER_SIZE) / FOOD_SIZE; i++) {
+      this.players.push({
+        id: 'food-' + Math.random(),
+        x: item.x + Math.floor(Math.random() * item.width),
+        y: item.y + Math.floor(Math.random() * item.height),
+        width: FOOD_SIZE,
+        height: FOOD_SIZE,
+        velocity: { x: 0, y: 0 },
+        type: 'green',
+      });
+    }
+
+    item.height = 40;
+    item.width = 40;
   }
 
   remove(item) {
@@ -146,14 +170,33 @@ export default class GameBoard extends React.Component {
   }
 
   updateNodes() {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     for (let i = 0; i < this.players.length; i++) {
-      if (this.players[i].type === 'food') continue;
-      this._cache.nodes[this.players[i].id].style.transform = 'translate3d(' + (this.players[i].x - this.players[i].width / 2) + 'px,' + (this.players[i].y - this.players[i].height / 2) + 'px,0)';
-      this._cache.nodes[this.players[i].id].style.border = this.players[i].isColliding ? '2px solid red' : '';
-      this._cache.nodes[this.players[i].id].style.width = this.players[i].width + 'px';
-      this._cache.nodes[this.players[i].id].style.height = this.players[i].height + 'px';
-      this._cache.nodes[this.players[i].id].style.borderRadius = (this.players[i].height / 2) + 'px';
+      this.context.save();
+      this.drawCircle(this.players[i]);
+      if (this.players[i].type === 'player') {
+        this.drawPlayer(this.players[i]);
+      }
+      this.context.restore();
     }
+  }
+
+  drawCircle(player) {
+    this.context.beginPath();
+    this.context.arc(player.x, player.y, player.height / 2, 0, Math.PI * 2, true);
+    this.context.fillStyle = player.type;
+    this.context.fill();
+    this.context.closePath();
+    this.context.clip();
+  }
+
+  drawPlayer(player) {
+    this.context.drawImage(this._cache.avatar[player.id], player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+
+    this.context.beginPath();
+    this.context.arc(0, 0, player.height / 2, 0, Math.PI * 2, true);
+    this.context.clip();
+    this.context.closePath();
   }
 
   addPlayer(snapshot) {
@@ -161,8 +204,8 @@ export default class GameBoard extends React.Component {
     const newPlayer = {
       id: snapshot.key,
       avatar: snapshot.val().avatar,
-      width: 40,
-      height: 40,
+      width: PLAYER_SIZE,
+      height: PLAYER_SIZE,
       x: this.width / 2,
       y: this.height / 2,
       isColliding: false,
@@ -176,16 +219,20 @@ export default class GameBoard extends React.Component {
 
     this.players.push(newPlayer);
     this.forceUpdate();
-    this._cache.nodes[newPlayer.id] = document.getElementById('player-' + newPlayer.id);
+    this._cache.avatar[newPlayer.id] = document.createElement('img');
+    this._cache.avatar[newPlayer.id].src = newPlayer.avatar;
   }
 
   render() {
-    return (
+    /**
       <div style={{ width: this.width, height: this.height }}>
         {this.players.map((player) => (
           <Player key={player.id} player={player}/>
         ))}
       </div>
+    */
+    return (
+      <canvas id="canvas" width={this.width} height={this.height}></canvas>
     );
   }
 }
