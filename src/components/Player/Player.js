@@ -8,11 +8,12 @@ export default class Player extends React.Component {
 
   getStyles() {
     return {
-      width: this.props.player.size * 2,
-      height: this.props.player.size * 2,
-      borderRadius: this.props.player.size,
-      transform: 'translate3d(' + this.props.player.position.x + 'px,' + this.props.player.position.y + 'px,0)',
+      width: this.props.player.width,
+      height: this.props.player.height,
+      borderRadius: this.props.player.width / 2,
+      transform: 'translate3d(' + this.props.player.x + 'px,' + this.props.player.y + 'px,0)',
       backgroundImage: 'url("' + this.props.player.avatar + '")',
+      border: this.props.player.isColliding ? '2px solid red' : '',
     };
   }
 

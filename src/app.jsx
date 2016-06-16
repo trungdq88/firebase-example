@@ -3,7 +3,7 @@
  */
 
 import './index.html';
-// import './third-party/bootstrap.js';
+import '!script!./third-party/QuadTree.js';
 import App from './components/App';
 import React from 'react';
 import ReactDOM from 'react-dom';
