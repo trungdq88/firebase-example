@@ -19,9 +19,15 @@ html, body {
 #container {
   z-index: 1;
 }
-#login {
+#screen-login {
+  display: none;
   z-index: 2;
-  background-color: rgba(255, 255, 255, 0.75);
+  background-color: rgba(255, 255, 255, 0.85);
+}
+#screen-loading {
+  z-index: 3;
+  background-color: rgba(255, 255, 255, 0.85);
+  font-size: 20px;
 }
 #range {
   width: 200px;
@@ -40,21 +46,49 @@ html, body {
   top: 0;
   opacity: 0;
 }
-#login-button {
+#btn-facebook {
   text-align: center;
   background-color: #3b5998;
   padding: 20px;
   color: white;
   font-size: 20px;
 }
+#profile {
+  position: fixed;
+  width: 100%;
+  background: #039be5;
+  height: 40px;
+  line-height: 40px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding-right: 10px;
+}
+#img-avatar {
+  width: 40px;
+  height: 40px;
+  background: #969696;
+  background-size: cover;
+  background-position: center center;
+}
 </style>
 </head>
 <body>
-  <div id="login" class="screen">
-    <div id="login-button">Facebook Login</div>
+  <div id="screen-loading" class="screen">
+    Loading...
+  </div>
+
+  <div id="screen-login" class="screen">
+    <div id="btn-facebook">Facebook Login</div>
   </div>
 
   <div id="container" class="screen">
+    <div id="profile">
+      <div id="img-avatar"></div>
+      <div id="lbl-username">Guest</div>
+      <div id="btn-logout">Logout</div>
+    </div>
     <div id="range">
       <div id="target">
       </div>

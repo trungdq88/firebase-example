@@ -1,18 +1,68 @@
-"use strict";
+'use strict';
+
+var firebase = firebase || {};
+var Rx = Rx || {};
+
+var screenLogin = document.getElementById('screen-login');
+var screenLoading = document.getElementById('screen-loading');
+var imgAvatar = document.getElementById('img-avatar');
+var range = document.getElementById('range');
+var target = document.getElementById('target');
+var lblUsername = document.getElementById('lbl-username');
+var btnFacebook = document.getElementById('btn-facebook');
+var btnLogout = document.getElementById('btn-logout');
 
 // Initialize Firebase
 var config = {
-  apiKey: "AIzaSyCpQjFy_vv-bMZzel-NWu44v1vZGCL8uxE",
-  authDomain: "fir-example-c2211.firebaseapp.com",
-  databaseURL: "https://fir-example-c2211.firebaseio.com",
-  storageBucket: ""
+  apiKey: 'AIzaSyCpQjFy_vv-bMZzel-NWu44v1vZGCL8uxE',
+  authDomain: 'fir-example-c2211.firebaseapp.com',
+  databaseURL: 'https://fir-example-c2211.firebaseio.com',
+  storageBucket: ''
 };
 firebase.initializeApp(config);
 
+var obsAuthStateChange = new Rx.Subject();
+var obsAuthLoggedIn = obsAuthStateChange.filter(function (user) {
+  return user !== null;
+});
+var obsAuthLoggedOut = obsAuthStateChange.filter(function (user) {
+  return user === null;
+});
+
 // Get a reference to the database service
 var database = firebase.database();
+var auth = firebase.auth();
 
-var databaseRef = database.ref('players/player0');
+auth.onAuthStateChanged(function (user) {
+  obsAuthStateChange.onNext(user);
+  screenLoading.style.display = 'none';
+});
+
+// Authenticate
+obsAuthLoggedIn.subscribe(function () {
+  var user = auth.currentUser;
+  lblUsername.innerText = user.displayName;
+  imgAvatar.style.backgroundImage = 'url(\'' + user.photoURL + '\')';
+  screenLogin.style.display = 'none';
+  database.ref('players/' + user.uid).update({
+    'name': user.displayName,
+    'avatar': user.photoURL
+  });
+});
+
+obsAuthLoggedOut.subscribe(function () {
+  lblUsername.innerText = 'Guest';
+  screenLogin.style.display = 'flex';
+  imgAvatar.style.backgroundImage = '';
+});
+
+Rx.Observable.fromEvent(btnFacebook, 'click').subscribe(function () {
+  return auth.signInWithPopup(new firebase.auth.FacebookAuthProvider());
+});
+
+Rx.Observable.fromEvent(btnLogout, 'click').subscribe(function () {
+  return auth.signOut();
+});
 
 var sampleTouch = {
   preventDefault: function preventDefault() {},
@@ -22,7 +72,7 @@ var sampleTouch = {
   }]
 };
 
-Rx.Observable.fromEvent(range, 'touchstart').startWith(sampleTouch).flatMap(function (e) {
+Rx.Observable.fromEvent(range, 'touchstart').startWith(sampleTouch).flatMap(function () {
   return Rx.Observable.fromEvent(range, 'touchmove').startWith(sampleTouch).takeUntil(Rx.Observable.fromEvent(range, 'touchend')).concat(Rx.Observable.just(sampleTouch));
 }).map(function (e) {
   e.preventDefault();
@@ -47,12 +97,14 @@ Rx.Observable.fromEvent(range, 'touchstart').startWith(sampleTouch).flatMap(func
   return { left: left, top: top };
 }).map(function (pos) {
   target.style.opacity = 1;
-  target.style.transform = "translate3d(" + pos.left + "px, " + pos.top + "px, 0)";
+  target.style.transform = 'translate3d(' + pos.left + 'px, ' + pos.top + 'px, 0)';
 
   return {
     x: pos.left + target.offsetWidth / 2 - (range.offsetLeft + range.offsetWidth / 2),
     y: pos.top + target.offsetHeight / 2 - (range.offsetTop + range.offsetHeight / 2)
   };
-}).debounce(10).subscribe(function (value) {
-  databaseRef.update({ 'velocity': value });
+}).debounce(10).filter(function () {
+  return auth.currentUser !== null;
+}).subscribe(function (value) {
+  database.ref('players/' + auth.currentUser.uid).update({ 'velocity': value });
 });

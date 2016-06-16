@@ -1,28 +1,73 @@
+const firebase = firebase || {};
+const Rx = Rx || {};
+
+const screenLogin = document.getElementById('screen-login');
+const screenLoading = document.getElementById('screen-loading');
+const imgAvatar = document.getElementById('img-avatar');
+const range = document.getElementById('range');
+const target = document.getElementById('target');
+const lblUsername = document.getElementById('lbl-username');
+const btnFacebook = document.getElementById('btn-facebook');
+const btnLogout = document.getElementById('btn-logout');
+
 // Initialize Firebase
-var config = {
-  apiKey: "AIzaSyCpQjFy_vv-bMZzel-NWu44v1vZGCL8uxE",
-  authDomain: "fir-example-c2211.firebaseapp.com",
-  databaseURL: "https://fir-example-c2211.firebaseio.com",
-  storageBucket: "",
+const config = {
+  apiKey: 'AIzaSyCpQjFy_vv-bMZzel-NWu44v1vZGCL8uxE',
+  authDomain: 'fir-example-c2211.firebaseapp.com',
+  databaseURL: 'https://fir-example-c2211.firebaseio.com',
+  storageBucket: '',
 };
 firebase.initializeApp(config);
 
-// Get a reference to the database service
-var database = firebase.database();
+const obsAuthStateChange = new Rx.Subject();
+const obsAuthLoggedIn = obsAuthStateChange.filter(user => user !== null);
+const obsAuthLoggedOut = obsAuthStateChange.filter(user => user === null);
 
-const databaseRef = database.ref('players/player0');
+// Get a reference to the database service
+const database = firebase.database();
+const auth = firebase.auth();
+
+auth.onAuthStateChanged(user => {
+  obsAuthStateChange.onNext(user);
+  screenLoading.style.display = 'none';
+});
+
+// Authenticate
+obsAuthLoggedIn.subscribe(() => {
+  const user = auth.currentUser;
+  lblUsername.innerText = user.displayName;
+  imgAvatar.style.backgroundImage = `url('${user.photoURL}')`;
+  screenLogin.style.display = 'none';
+  database.ref(`players/${user.uid}`).update({
+    'name': user.displayName,
+    'avatar': user.photoURL,
+  });
+});
+
+obsAuthLoggedOut.subscribe(() => {
+  lblUsername.innerText = 'Guest';
+  screenLogin.style.display = 'flex';
+  imgAvatar.style.backgroundImage = '';
+});
+
+Rx.Observable.fromEvent(btnFacebook, 'click')
+.subscribe(() => auth.signInWithPopup(new firebase.auth.FacebookAuthProvider()));
+
+Rx.Observable.fromEvent(btnLogout, 'click')
+.subscribe(() => auth.signOut());
+
 
 const sampleTouch = {
   preventDefault: () => {},
   touches: [{
     clientX: range.offsetLeft + range.offsetWidth / 2,
-    clientY: range.offsetTop + range.offsetHeight / 2
+    clientY: range.offsetTop + range.offsetHeight / 2,
   }],
 };
 
 Rx.Observable.fromEvent(range, 'touchstart')
 .startWith(sampleTouch)
-.flatMap(e => Rx.Observable.fromEvent(range, 'touchmove')
+.flatMap(() => Rx.Observable.fromEvent(range, 'touchmove')
     .startWith(sampleTouch)
     .takeUntil(Rx.Observable.fromEvent(range, 'touchend'))
     .concat(Rx.Observable.just(sampleTouch))
@@ -34,10 +79,12 @@ Rx.Observable.fromEvent(range, 'touchstart')
     y: e.touches[0].clientY,
   };
 })
-.map(touch => { return {
-  left: touch.x - target.offsetWidth / 2,
-  top: touch.y - target.offsetHeight / 2,
-}})
+.map(touch => {
+  return {
+    left: touch.x - target.offsetWidth / 2,
+    top: touch.y - target.offsetHeight / 2,
+  };
+})
 .map(pos => {
   let left = pos.left;
   let top = pos.top;
@@ -59,6 +106,7 @@ Rx.Observable.fromEvent(range, 'touchstart')
   };
 })
 .debounce(10)
+.filter(() => auth.currentUser !== null)
 .subscribe(value => {
-  databaseRef.update({'velocity': value});
+  database.ref(`players/${auth.currentUser.uid}`).update({ 'velocity': value });
 });
