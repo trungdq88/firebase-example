@@ -33,3 +33,22 @@ firebase.database().ref('players').on('child_added', function (playerData) {
     player.velocity = velocityData.val();
   });
 });
+
+window.addBot = function addBot() {
+  var player = {
+    id: 'hehe',
+    name: 'bot-' + Math.floor(Math.random() * 1000),
+    avatar: 'https://avatars0.githubusercontent.com/u/37918?v=3&s=40',
+    velocity: { x: 0, y: 0 }
+  };
+
+  // Add player to the game
+  game.addPlayer(player);
+
+  setInterval(function () {
+    player.velocity = {
+      x: 80 - Math.random() * 160,
+      y: 80 - Math.random() * 160
+    };
+  }, 5000);
+};
