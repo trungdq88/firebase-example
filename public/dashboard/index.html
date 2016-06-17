@@ -1,4 +1,7 @@
-<style>
+<html>
+<head>
+  <title>Firebase Example Dashboard</title>
+  <style>
 body {
   margin: 0;
   overflow: hidden;
@@ -36,24 +39,36 @@ canvas {
   font-weight: bold;
   font-size: 50px;
 }
-</style>
-<div id="winner">
-  <div>
+  </style>
+</head>
+<body>
+
+  <!-- Game canvas -->
+  <canvas id="canvas"></canvas>
+
+  <!-- Leaderboard screen -->
+  <div id="leaderboard"></div>
+
+  <!-- Winner screen -->
+  <div id="winner">
     <div>
-      Congratulation!<br/>
-      <img id="avatar" width="200px" src=""/><br/>
-      <span id="username"></span>
+      <div>
+        Congratulation!<br/>
+        <img id="avatar" width="200px" src=""/><br/>
+        <span id="username"></span>
+      </div>
+      <div id="restart"><a href="javascript:location.reload()">Restart</a></div>
     </div>
-    <div id="restart"><a href="javascript:location.reload()">Restart</a></div>
   </div>
-</div>
-<div id="leaderboard">
 
-</div>
-<canvas id="canvas"></canvas>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.lite.js"></script>
-<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
-<script src="QuadTree.js"></script>
+  <!-- Libraries used -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.1.0/rx.lite.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+  <script src="QuadTree.js"></script>
 
-<script src="build/GameBoard.js"></script>
-<script src="build/main.js"></script>
+  <!-- My code -->
+  <script src="build/GameBoard.js"></script>
+  <script src="build/main.js"></script>
+
+</body>
+</html>
