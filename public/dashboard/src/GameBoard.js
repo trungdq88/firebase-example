@@ -1,7 +1,7 @@
 const QuadTree = QuadTree || {};
 
 const MAX_VELOCITY = 80;
-const SPEED_CONST = 150;
+const SPEED_CONST = 50;
 const WEIGHT = 60;
 const FOOD_SIZE = 12;
 const FOOD_SCORE = 2;
@@ -45,6 +45,7 @@ class GameBoard {
 
   // Initialize the game
   init() {
+    let triggerLoop = () => {};
     // Game loop
     const gameLoop = () => {
       for (let i = 0; i < this.players.length; i++) {
@@ -53,11 +54,12 @@ class GameBoard {
       this.updateTree();
       this.checkCollision();
       this.render();
+      triggerLoop(); // Recursive call
     };
-    const a = () => {
+    triggerLoop = () => {
       window.requestAnimationFrame(gameLoop);
     };
-    this.timer = setInterval(a, 1);
+    triggerLoop();
 
     // Add "food"
     setInterval(() => {

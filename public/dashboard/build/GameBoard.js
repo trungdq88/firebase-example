@@ -7,7 +7,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var QuadTree = QuadTree || {};
 
 var MAX_VELOCITY = 80;
-var SPEED_CONST = 150;
+var SPEED_CONST = 50;
 var WEIGHT = 60;
 var FOOD_SIZE = 12;
 var FOOD_SCORE = 2;
@@ -55,6 +55,7 @@ var GameBoard = function () {
     value: function init() {
       var _this = this;
 
+      var triggerLoop = function triggerLoop() {};
       // Game loop
       var gameLoop = function gameLoop() {
         for (var i = 0; i < _this.players.length; i++) {
@@ -63,11 +64,12 @@ var GameBoard = function () {
         _this.updateTree();
         _this.checkCollision();
         _this.render();
+        triggerLoop(); // Recursive call
       };
-      var a = function a() {
+      triggerLoop = function triggerLoop() {
         window.requestAnimationFrame(gameLoop);
       };
-      this.timer = setInterval(a, 1);
+      triggerLoop();
 
       // Add "food"
       setInterval(function () {
