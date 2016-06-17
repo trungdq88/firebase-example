@@ -19,6 +19,7 @@ firebase.database().ref('players').on('child_added', playerData => {
   const player = {
     id: playerData.key,
     avatar: playerData.val().avatar,
+    name: playerData.val().name,
     velocity: { x: 0, y: 0 },
   };
 

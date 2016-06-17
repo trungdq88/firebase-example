@@ -13,9 +13,9 @@ class GameBoard {
     this.players = [];
 
     // Set viewport of the canvas and QuadTree
-    this.width = window.innerWidth
+    this.width = (window.innerWidth
        || document.documentElement.clientWidth
-       || document.body.clientWidth;
+       || document.body.clientWidth) - 200;
 
     this.height = window.innerHeight
        || document.documentElement.clientHeight
@@ -131,14 +131,17 @@ class GameBoard {
             // "Explode"
             this.explode(this._cache.player);
             this.remove(this._cache.item);
+            this.updateLeaderBoard();
           } else if (this._cache.player.height > this._cache.item.height) {
             // "Eat"
             this.bigger(this._cache.player, this._cache.item.height / (FOOD_SIZE / FOOD_SCORE));
             this.remove(this._cache.item);
+            this.updateLeaderBoard();
           } else if (this._cache.player.height < this._cache.item.height) {
             // "Get eaten"
             this.bigger(this._cache.item, this._cache.player.height / (FOOD_SIZE / FOOD_SCORE));
             this.remove(this._cache.player);
+            this.updateLeaderBoard();
           }
         }
       }
@@ -182,6 +185,25 @@ class GameBoard {
   updateTree() {
     this.quadTree.clear();
     this.quadTree.insert(this.players);
+  }
+
+  updateLeaderBoard() {
+    const players = this.players.filter(player => player.type === 'player');
+
+    if (players.length === 1 && players[0].width > PLAYER_SIZE) {
+      this.showWinner(players[0]);
+    }
+
+    const str = players.map(player => Math.round(player.width) + ' - ' + player.name)
+    .join('<br/>');
+
+    document.getElementById('leaderboard').innerHTML = str;
+  }
+
+  showWinner(player) {
+    document.getElementById('winner').style.display = 'flex';
+    document.getElementById('avatar').src = player.avatar;
+    document.getElementById('username').innerText = player.name;
   }
 
   // Re-render the canvas
@@ -229,7 +251,8 @@ class GameBoard {
     this.players.push(player);
     this._cache.avatar[player.id] = document.createElement('img');
     this._cache.avatar[player.id].src = player.avatar;
-    return player;
+
+    this.updateLeaderBoard();
   }
 }
 

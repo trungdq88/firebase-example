@@ -21,7 +21,7 @@ var GameBoard = function () {
     this.players = [];
 
     // Set viewport of the canvas and QuadTree
-    this.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    this.width = (window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) - 200;
 
     this.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
@@ -145,14 +145,17 @@ var GameBoard = function () {
               // "Explode"
               this.explode(this._cache.player);
               this.remove(this._cache.item);
+              this.updateLeaderBoard();
             } else if (this._cache.player.height > this._cache.item.height) {
               // "Eat"
               this.bigger(this._cache.player, this._cache.item.height / (FOOD_SIZE / FOOD_SCORE));
               this.remove(this._cache.item);
+              this.updateLeaderBoard();
             } else if (this._cache.player.height < this._cache.item.height) {
               // "Get eaten"
               this.bigger(this._cache.item, this._cache.player.height / (FOOD_SIZE / FOOD_SCORE));
               this.remove(this._cache.player);
+              this.updateLeaderBoard();
             }
           }
         }
@@ -208,6 +211,30 @@ var GameBoard = function () {
     value: function updateTree() {
       this.quadTree.clear();
       this.quadTree.insert(this.players);
+    }
+  }, {
+    key: 'updateLeaderBoard',
+    value: function updateLeaderBoard() {
+      var players = this.players.filter(function (player) {
+        return player.type === 'player';
+      });
+
+      if (players.length === 1 && players[0].width > PLAYER_SIZE) {
+        this.showWinner(players[0]);
+      }
+
+      var str = players.map(function (player) {
+        return Math.round(player.width) + ' - ' + player.name;
+      }).join('<br/>');
+
+      document.getElementById('leaderboard').innerHTML = str;
+    }
+  }, {
+    key: 'showWinner',
+    value: function showWinner(player) {
+      document.getElementById('winner').style.display = 'flex';
+      document.getElementById('avatar').src = player.avatar;
+      document.getElementById('username').innerText = player.name;
     }
 
     // Re-render the canvas
@@ -267,7 +294,8 @@ var GameBoard = function () {
       this.players.push(player);
       this._cache.avatar[player.id] = document.createElement('img');
       this._cache.avatar[player.id].src = player.avatar;
-      return player;
+
+      this.updateLeaderBoard();
     }
   }]);
 
