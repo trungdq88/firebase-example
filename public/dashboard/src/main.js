@@ -1,6 +1,3 @@
-import React from 'react';
-import firebaseDemoApp from '../../third-party/Firebase.js';
-const QuadTree = window.QuadTree;
 
 const MAX_VELOCITY = 80;
 const SPEED_CONST = 150;
@@ -8,9 +5,17 @@ const WEIGHT = 60;
 const FOOD_SIZE = 10;
 const PLAYER_SIZE = 40;
 
-export default class GameBoard extends React.Component {
-  constructor(...args) {
-    super(...args);
+// Initialize Firebase
+const config = {
+  apiKey: 'AIzaSyCpQjFy_vv-bMZzel-NWu44v1vZGCL8uxE',
+  authDomain: 'fir-example-c2211.firebaseapp.com',
+  databaseURL: 'https://fir-example-c2211.firebaseio.com',
+  storageBucket: '',
+};
+firebase.initializeApp(config);
+
+class GameBoard {
+  constructor() {
     this.players = [];
     this.width = window.innerWidth
        || document.documentElement.clientWidth
@@ -35,15 +40,19 @@ export default class GameBoard extends React.Component {
       speed: undefined,
       avatar: {},
     };
+
+    this.canvas = document.getElementById('canvas');
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
+    this.context = this.canvas.getContext('2d');
   }
 
-  componentDidMount() {
+  init() {
     const b = () => {
       for (let i = 0; i < this.players.length; i++) {
         this.setNewPosition(this.players[i]);
       }
       this.updateTree();
-      // Check collision
       this.checkCollision();
       this.updateNodes();
     };
@@ -52,7 +61,7 @@ export default class GameBoard extends React.Component {
     };
     this.timer = setInterval(a, 1);
 
-    firebaseDemoApp.database().ref('players').on('child_added', snapshot => {
+    firebase.database().ref('players').on('child_added', snapshot => {
       this.addPlayer(snapshot);
     });
 
@@ -67,12 +76,8 @@ export default class GameBoard extends React.Component {
           velocity: { x: 0, y: 0 },
           type: Math.random() > 0.9 ? 'red' : 'green',
         });
-        this.forceUpdate();
       }
     }, 2000);
-
-    this.canvas = document.getElementById('canvas');
-    this.context = this.canvas.getContext('2d');
   }
 
   setNewPosition(player) {
@@ -213,26 +218,15 @@ export default class GameBoard extends React.Component {
       type: 'player',
     };
 
-    firebaseDemoApp.database().ref('players/' + newPlayer.id + '/velocity').on('value', snapshot1 => {
+    firebase.database().ref('players/' + newPlayer.id + '/velocity').on('value', snapshot1 => {
       newPlayer.velocity = snapshot1.val();
     });
 
     this.players.push(newPlayer);
-    this.forceUpdate();
     this._cache.avatar[newPlayer.id] = document.createElement('img');
     this._cache.avatar[newPlayer.id].src = newPlayer.avatar;
   }
 
-  render() {
-    /**
-      <div style={{ width: this.width, height: this.height }}>
-        {this.players.map((player) => (
-          <Player key={player.id} player={player}/>
-        ))}
-      </div>
-    */
-    return (
-      <canvas id="canvas" width={this.width} height={this.height}></canvas>
-    );
-  }
 }
+
+new GameBoard().init();
