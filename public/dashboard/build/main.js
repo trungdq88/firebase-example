@@ -4,10 +4,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var firebase = firebase || {};
+var QuadTree = QuadTree || {};
+
 var MAX_VELOCITY = 80;
 var SPEED_CONST = 150;
 var WEIGHT = 60;
-var FOOD_SIZE = 10;
+var FOOD_SIZE = 12;
+var FOOD_SCORE = 2;
 var PLAYER_SIZE = 40;
 
 // Initialize Firebase
@@ -89,6 +93,7 @@ var GameBoard = function () {
   }, {
     key: 'setNewPosition',
     value: function setNewPosition(player) {
+      if (!player.velocity) return;
       this._cache.speed = Math.sqrt(player.velocity.x * player.velocity.x + player.velocity.y * player.velocity.y);
       this._cache.newX = player.x + this._cache.speed * player.velocity.x / MAX_VELOCITY / SPEED_CONST / (player.height / WEIGHT);
       this._cache.newY = player.y + this._cache.speed * player.velocity.y / MAX_VELOCITY / SPEED_CONST / (player.height / WEIGHT);
@@ -121,7 +126,7 @@ var GameBoard = function () {
           if (this._cache.player === this._cache.item) {
             continue;
           }
-          if (this._cache.player.isColliding && this._cache.item.isColliding) {
+          if (this._cache.player.isColliding) {
             continue;
           }
           this._cache.dx = this._cache.player.x - this._cache.item.x;
@@ -131,14 +136,15 @@ var GameBoard = function () {
           this._cache.colliding = this._cache.dx * this._cache.dx + this._cache.dy * this._cache.dy < this._cache.radii * this._cache.radii;
 
           if (this._cache.colliding) {
+            this._cache.player.isColliding = true;
             if (this._cache.item.type === 'red') {
               this.resetSize(this._cache.player);
               this.remove(this._cache.item);
             } else if (this._cache.player.height > this._cache.item.height) {
-              this.bigger(this._cache.player, this._cache.item.height / FOOD_SIZE);
+              this.bigger(this._cache.player, this._cache.item.height / (FOOD_SIZE / FOOD_SCORE));
               this.remove(this._cache.item);
             } else if (this._cache.player.height < this._cache.item.height) {
-              this.bigger(this._cache.item, this._cache.player.height / FOOD_SIZE);
+              this.bigger(this._cache.item, this._cache.player.height / (FOOD_SIZE / FOOD_SCORE));
               this.remove(this._cache.player);
             }
           }
@@ -210,8 +216,9 @@ var GameBoard = function () {
   }, {
     key: 'drawPlayer',
     value: function drawPlayer(player) {
-      this.context.drawImage(this._cache.avatar[player.id], player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
-
+      if (this._cache.avatar[player.id]) {
+        this.context.drawImage(this._cache.avatar[player.id], player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+      }
       this.context.beginPath();
       this.context.arc(0, 0, player.height / 2, 0, Math.PI * 2, true);
       this.context.clip();

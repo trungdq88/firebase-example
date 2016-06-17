@@ -1,8 +1,11 @@
+const firebase = firebase || {};
+const QuadTree = QuadTree || {};
 
 const MAX_VELOCITY = 80;
 const SPEED_CONST = 150;
 const WEIGHT = 60;
-const FOOD_SIZE = 10;
+const FOOD_SIZE = 12;
+const FOOD_SCORE = 2;
 const PLAYER_SIZE = 40;
 
 // Initialize Firebase
@@ -81,6 +84,7 @@ class GameBoard {
   }
 
   setNewPosition(player) {
+    if (!player.velocity) return;
     this._cache.speed = Math.sqrt(player.velocity.x * player.velocity.x
       + player.velocity.y * player.velocity.y);
     this._cache.newX = player.x + this._cache.speed * player.velocity.x / MAX_VELOCITY / SPEED_CONST / (player.height / WEIGHT);
@@ -113,7 +117,7 @@ class GameBoard {
         if (this._cache.player === this._cache.item) {
           continue;
         }
-        if (this._cache.player.isColliding && this._cache.item.isColliding) {
+        if (this._cache.player.isColliding) {
           continue;
         }
         this._cache.dx = this._cache.player.x - this._cache.item.x;
@@ -124,14 +128,15 @@ class GameBoard {
           < (this._cache.radii * this._cache.radii);
 
         if (this._cache.colliding) {
+          this._cache.player.isColliding = true;
           if (this._cache.item.type === 'red') {
             this.resetSize(this._cache.player);
             this.remove(this._cache.item);
           } else if (this._cache.player.height > this._cache.item.height) {
-            this.bigger(this._cache.player, this._cache.item.height / FOOD_SIZE);
+            this.bigger(this._cache.player, this._cache.item.height / (FOOD_SIZE / FOOD_SCORE));
             this.remove(this._cache.item);
           } else if (this._cache.player.height < this._cache.item.height) {
-            this.bigger(this._cache.item, this._cache.player.height / FOOD_SIZE);
+            this.bigger(this._cache.item, this._cache.player.height / (FOOD_SIZE / FOOD_SCORE));
             this.remove(this._cache.player);
           }
         }
@@ -196,8 +201,9 @@ class GameBoard {
   }
 
   drawPlayer(player) {
-    this.context.drawImage(this._cache.avatar[player.id], player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
-
+    if (this._cache.avatar[player.id]) {
+      this.context.drawImage(this._cache.avatar[player.id], player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
+    }
     this.context.beginPath();
     this.context.arc(0, 0, player.height / 2, 0, Math.PI * 2, true);
     this.context.clip();

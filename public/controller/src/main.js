@@ -45,6 +45,7 @@ obsAuthLoggedIn.subscribe(() => {
   database.ref(`players/${user.uid}`).update({
     'name': user.displayName,
     'avatar': user.photoURL,
+    'velocity': { x: 0, y: 0 },
   });
 });
 obsAuthLoggedOut.subscribe(() => {
