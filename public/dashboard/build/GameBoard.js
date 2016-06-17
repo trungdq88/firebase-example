@@ -223,6 +223,10 @@ var GameBoard = function () {
         this.showWinner(players[0]);
       }
 
+      players.sort(function (a, b) {
+        return a.width < b.width;
+      });
+
       var str = players.map(function (player) {
         return Math.round(player.width) + ' - ' + player.name;
       }).join('<br/>');

@@ -194,6 +194,8 @@ class GameBoard {
       this.showWinner(players[0]);
     }
 
+    players.sort((a, b) => a.width < b.width);
+
     const str = players.map(player => Math.round(player.width) + ' - ' + player.name)
     .join('<br/>');
 
