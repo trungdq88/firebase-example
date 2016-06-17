@@ -201,9 +201,9 @@ class GameBoard {
   }
 
   drawPlayer(player) {
-    if (this._cache.avatar[player.id]) {
+    try {
       this.context.drawImage(this._cache.avatar[player.id], player.x - player.width / 2, player.y - player.height / 2, player.width, player.height);
-    }
+    } catch (e) { console.log(e); } // Image failed to load
     this.context.beginPath();
     this.context.arc(0, 0, player.height / 2, 0, Math.PI * 2, true);
     this.context.clip();
