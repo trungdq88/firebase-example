@@ -218,24 +218,18 @@ class GameBoard {
   }
 
   // New player to the game
-  addPlayer(snapshot) {
-    // Should listen to new player event
-    const newPlayer = {
-      id: snapshot.key,
-      avatar: snapshot.val().avatar,
-      width: PLAYER_SIZE,
-      height: PLAYER_SIZE,
-      x: this.width / 2,
-      y: this.height / 2,
-      isColliding: false,
-      velocity: { x: 0, y: 0 },
-      type: 'player',
-    };
+  addPlayer(player) {
+    player.width = PLAYER_SIZE;
+    player.height = PLAYER_SIZE;
+    player.x = this.width / 2;
+    player.y = this.height / 2;
+    player.isColliding = false;
+    player.type = 'player';
 
-    this.players.push(newPlayer);
-    this._cache.avatar[newPlayer.id] = document.createElement('img');
-    this._cache.avatar[newPlayer.id].src = newPlayer.avatar;
-    return newPlayer;
+    this.players.push(player);
+    this._cache.avatar[player.id] = document.createElement('img');
+    this._cache.avatar[player.id].src = player.avatar;
+    return player;
   }
 }
 

@@ -16,7 +16,14 @@ game.init();
 
 // Firebase binding when there is new player
 firebase.database().ref('players').on('child_added', playerData => {
-  const player = game.addPlayer(playerData);
+  const player = {
+    id: playerData.key,
+    avatar: playerData.val().avatar,
+    velocity: { x: 0, y: 0 },
+  };
+
+  // Add player to the game
+  game.addPlayer(player);
 
   // Listener for player velocity change
   firebase.database().ref('players/' + player.id + '/velocity').on('value', velocityData => {
