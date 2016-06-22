@@ -1,9 +1,13 @@
 # firebase-example
-A web application to demonstrate Firebase features
+A web application to demonstrate Firebase features:
+
+- Realtime Database
+- Authentication
+- Hosting
 
 See Firebase example with Realtime Database, Authentication, Storage and Hosting: https://github.com/trungdq88/firebase-checkin
 
-Gameplay is similar to the famous agar.io game, but with controller, built with Firebase Realtime Database.
+*Gameplay*: similar to the famous agar.io game, but with controller, built with Firebase Realtime Database.
 
 This game is design to play in a presentation for demonstration purpose.
 
