@@ -1,4 +1,5 @@
-# firebase-example
+# Firebase Example
+
 A web application to demonstrate Firebase features:
 
 - Realtime Database
@@ -17,3 +18,18 @@ This game is design to play in a presentation for demonstration purpose.
 - Controller: https://fir-example-c2211.firebaseapp.com/dashboard/ (should be visited on phones or tablets)
 
 *Notice:* game logic is calculated at client side in the dashboard screen, so if there is more than 1 dashboard screen opened, they will not sync!
+
+# Development
+
+Source placed in `/public/dashboard/src` and `/public/controller/src`.
+
+Build:
+
+```bash
+npm run build
+```
+
+Deploy
+```bash
+firebase deploy
+```
