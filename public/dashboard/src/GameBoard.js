@@ -63,7 +63,7 @@ class GameBoard {
 
     // Add "food"
     setInterval(() => {
-      if (this.players.length < 50) {
+      if (this.players.length < 70) {
         this.players.push({
           id: 'food-' + Math.random(),
           x: Math.floor(Math.random() * (this.width - 20)),
@@ -71,10 +71,10 @@ class GameBoard {
           width: FOOD_SIZE,
           height: FOOD_SIZE,
           velocity: { x: 0, y: 0 },
-          type: Math.random() > 0.9 ? 'red' : 'green',
+          type: Math.random() > 0.6 ? 'red' : 'green',
         });
       }
-    }, 2000);
+    }, 1000);
   }
 
   // Set new player position based on player velocity
