@@ -73,7 +73,7 @@ var GameBoard = function () {
 
       // Add "food"
       setInterval(function () {
-        if (_this.players.length < 50) {
+        if (_this.players.length < 70) {
           _this.players.push({
             id: 'food-' + Math.random(),
             x: Math.floor(Math.random() * (_this.width - 20)),
@@ -81,10 +81,10 @@ var GameBoard = function () {
             width: FOOD_SIZE,
             height: FOOD_SIZE,
             velocity: { x: 0, y: 0 },
-            type: Math.random() > 0.9 ? 'red' : 'green'
+            type: Math.random() > 0.7 ? 'red' : 'green'
           });
         }
-      }, 2000);
+      }, 1000);
     }
 
     // Set new player position based on player velocity

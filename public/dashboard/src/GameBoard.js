@@ -71,7 +71,7 @@ class GameBoard {
           width: FOOD_SIZE,
           height: FOOD_SIZE,
           velocity: { x: 0, y: 0 },
-          type: Math.random() > 0.6 ? 'red' : 'green',
+          type: Math.random() > 0.7 ? 'red' : 'green',
         });
       }
     }, 1000);
